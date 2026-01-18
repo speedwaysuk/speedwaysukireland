@@ -323,9 +323,17 @@ function SingleAuction() {
             <section className="col-span-1 lg:col-span-2">
                 {/* Title and top section */}
                 <div className="flex flex-wrap gap-2 capitalize justify-between items-center text-secondary">
-                    <Link to={`/auctions?category=${auction.category}`} className="underline">
-                        Category: {auction.category}
-                    </Link>
+                    <div className="flex flex-wrap gap-2">
+                        Category: {auction.categories?.map((category, index) => (
+                            <Link
+                                key={index}
+                                to={`/auctions?category=${category}`}
+                                className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors"
+                            >
+                                {category}
+                            </Link>
+                        ))}
+                    </div>
                     <div className="flex items-center gap-3">
                         <p onClick={toggleWatchlist}
                             className={`flex items-center gap-2 py-1 px-3 border border-gray-200 rounded-full transition-colors ${isWatchlisted
@@ -387,7 +395,7 @@ function SingleAuction() {
                 )}
 
                 {/* Image section */}
-                <ImageLightBox images={auction.photos} auctionType={auction?.auctionType} isReserveMet={auction.currentPrice >= auction.reservePrice} />
+                <ImageLightBox images={auction.photos} captions={auction.photos.map(photo => photo.caption || '')} auctionType={auction?.auctionType} isReserveMet={auction.currentPrice >= auction.reservePrice} />
 
                 <hr className="my-8" />
 
@@ -428,17 +436,24 @@ function SingleAuction() {
                         <h3 className="my-5 text-primary text-xl font-semibold">Document(s)</h3>
                         <div className="flex gap-5 max-w-full flex-wrap">
                             {auction.documents.map((doc, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => handleDocumentDownload(doc.url, doc.originalName || doc.filename)}
-                                    className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer border border-gray-200 py-3 px-5 rounded-md text-secondary group hover:text-primary"
-                                >
-                                    <File size={20} className="flex-shrink-0" />
-                                    <span className="group-hover:underline max-w-[125px] truncate">
-                                        {doc.originalName || doc.filename}
-                                    </span>
-                                    <Download size={20} className="flex-shrink-0" />
-                                </button>
+                                <div key={index} className="flex flex-col items-center">
+                                    <button
+                                        onClick={() => handleDocumentDownload(doc.url, doc.originalName || doc.filename)}
+                                        className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 cursor-pointer border border-gray-200 py-3 px-5 rounded-md text-secondary group hover:text-primary"
+                                    >
+                                        <File size={20} className="flex-shrink-0" />
+                                        <span className="group-hover:underline max-w-[125px] truncate">
+                                            {doc.originalName || doc.filename}
+                                        </span>
+                                        <Download size={20} className="flex-shrink-0" />
+                                    </button>
+                                    {/* Add caption display for documents */}
+                                    {doc.caption && (
+                                        <p className="text-xs text-gray-600 mt-1 max-w-[150px] text-center truncate" title={doc.caption}>
+                                            {doc.caption}
+                                        </p>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </div>
@@ -451,6 +466,7 @@ function SingleAuction() {
                             <h3 className="my-5 text-primary text-xl font-semibold">Service Records</h3>
                             <ImageLightBox
                                 images={auction.serviceRecords}
+                                captions={auction.serviceRecords.map(record => record.caption || '')} // ADD THIS LINE
                                 type="logbooks"
                             />
                         </div>
@@ -551,7 +567,7 @@ function SingleAuction() {
                         (auction.auctionType === 'reserve' || auction.auctionType === 'standard') && (
                             <p className="flex w-full justify-between border-b pb-2">
                                 <span className="text-secondary">Min. Bid Increment</span>
-                                <span className="font-medium">${auction?.bidIncrement?.toLocaleString()}</span>
+                                <span className="font-medium">£{auction?.bidIncrement?.toLocaleString()}</span>
                             </p>
                         )
                     }
